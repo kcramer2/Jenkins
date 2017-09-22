@@ -1,5 +1,5 @@
 universe                = vanilla
-executable              = gatherinfo.sh
+executable              = gatherinfo2.sh
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
 output                  = out.$(Process)
@@ -9,8 +9,8 @@ request_memory          = 128 MB
 request_cpus            = 1
 request_disk            = 1 * 1024
 
-output       = testjob.out.$(Process)
-log          = testjob.log.$(Process)
-error        = testjob.err.$(Process)
+output       = gpu1.out.$(Process)
+log          = gpu1.log.$(Process)
+error        = gpu1.err.$(Process)
 queue 1
 

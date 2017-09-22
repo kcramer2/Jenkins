@@ -9,8 +9,8 @@ request_memory          = 128 MB
 request_cpus            = 8
 request_disk            = 1 * 1024
 
-output       = testjob.out.$(Process)
-log          = testjob.log.$(Process)
-error        = testjob.err.$(Process)
-queue 5
+output       = cpu2.out.$(Process)
+log          = cpu2.log.$(Process)
+error        = cpu2.err.$(Process)
+queue 1
 

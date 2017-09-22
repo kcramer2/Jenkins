@@ -12,5 +12,5 @@ request_disk            = 1 * 1024
 output       = Mem.out.$(Process)
 log          = Mem.log.$(Process)
 error        = Mem.err.$(Process)
-queue 5
+queue 1
 
