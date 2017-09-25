@@ -1,0 +1,9 @@
+executable              = /bin/echo
+arguments               = "hello world"
+log                     = simple.log
+output                  = simple.out
+error                   = simple.error
+request_memory          = 1GB
+request_disk            = 1GB
+request_cpus            = 1
+queue
