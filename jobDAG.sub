@@ -1,10 +1,10 @@
 executable              = jobdag.sh
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
-log                     = simple.log
-output                  = simple.out
-error                   = simple.error
-request_memory          = 1GB
-request_disk            = 1GB
+log                     = jdag.log
+output                  = jdag.out
+error                   = jdag.error
+request_memory          = 128MB
+request_disk            = 128MB
 request_cpus            = 1
 queue

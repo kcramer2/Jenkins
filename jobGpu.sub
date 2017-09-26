@@ -1,0 +1,9 @@
+job = bandwidthTest
+universe = vanilla
+executable = $(job)
+log = $(job)_$(Cluster).log
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+output = $(job)_$(Cluster)_$(Process).out
+request_gpu=1
+queue
