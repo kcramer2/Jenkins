@@ -1,0 +1,9 @@
+executable = jobGluster.sh
+transfer_input_files = ffmpeg
+output = jobGluster.out
+error = jobGluster.error
+log = jobGluster.log
+request_memory = 5GB 
+request_disk = 5GB
+request_cpus = 1
+requirements = (Target.HasGluster == true)
