@@ -3,9 +3,9 @@ docker_image = debian
 executable              = gatherinfo.sh
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
-output                  = out.$(Process)
-error                   = err.$(Process)
-log                     = log.$(Process)
+output                  = docker.out.$(Process)
+error                   = docker.err.$(Process)
+log                     = docker.log.$(Process)
 request_memory          = 1GB
 requirements = (OpSysMajorVer == 7)
 
