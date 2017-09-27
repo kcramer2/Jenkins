@@ -7,3 +7,4 @@ request_memory = 5GB
 request_disk = 5GB
 request_cpus = 1
 requirements = (Target.HasGluster == true)
+queue 1
