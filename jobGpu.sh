@@ -1,8 +1,6 @@
 #!/bin/bash
 
-hostname
+./a.out
 date
 nvidia-smi
 
-nvcc jobGPU.cu -o jobGPU.cuda
-./jobGPU.cuda
