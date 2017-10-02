@@ -1,11 +1,11 @@
-universe = docker
-docker_image = debian
+universe                = docker
+docker_image            = debian
 executable              = gatherinfo.sh
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
-output                  = docker.out.$(Process)
-error                   = docker.err.$(Process)
-log                     = docker.log.$(Process)
+output                  = docker.out
+error                   = docker.err
+log                     = docker.log
 request_memory          = 1GB
 requirements = (OpSysMajorVer == 7)
 

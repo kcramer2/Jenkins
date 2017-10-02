@@ -2,15 +2,12 @@ universe                = vanilla
 executable              = gatherinfo.sh
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
-output                  = out.$(Process)
-log                     = log.$(Process)
-error                   = err.$(Process)
 request_memory          = 128 MB
 request_cpus            = 1
 request_disk            = 1 * 1024
 
-output       = cpu1.out.$(Process)
-log          = cpu1.log.$(Process)
-error        = cpu1.err.$(Process)
+output       = cpu1.out
+log          = cpu1.log
+error        = cpu1.err
 queue 1
 

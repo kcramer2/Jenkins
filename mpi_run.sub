@@ -5,9 +5,9 @@ should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
 transfer_input_files    = mpi1.c
 
-output                  = out.$(Process)
-log                     = log.$(Process)
-error                   = err.$(Process)
+output                  = mpi.out
+log                     = mpi.log
+error                   = mpi.err
 
 getenv                  = true
 

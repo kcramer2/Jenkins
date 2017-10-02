@@ -7,4 +7,6 @@ output                   = jobGpu.out
 log                      = jobGpu.log
 error                    = jobGpu.err
 request_GPUs             = 1
+requirements             = Machine == "gzk-1.chtc.wisc.edu"
+
 queue 1
