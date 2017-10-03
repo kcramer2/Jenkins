@@ -1,7 +1,7 @@
 #
 #		Python Submitter File
 #		Kent Cramer II
-#		9/22/2017
+#		10/2/2017
 #
 ############################################################
 #
@@ -38,17 +38,19 @@ elapsed = 0
 while true:
 	# The following outfiles are checked for their existence:
 	# cpu1.out, gluster.mov, mpi.out, jobGpu.out, docker.out, mem.out, jdag.out
-	# The presence of these files should indicate successful completeion of the submition
+	# The presence of these files should indicate successful completeion of the submission jobs
 	# This loop will check every 10 minutes for the status of these jobs, if 2 hours pass an alert will be generated
 
-	# This list will track with jobs do not have an out file yet.
+	# This list will track which jobs do not have an out file yet.
 	error = list()
 
-	# This set of commands checks for the Jobs in queue. If jobs have not yet been processed, this will no be 0.
+	# This set of commands checks for the Jobs in queue. If jobs have not yet been processed, this will not be 0.
 	status_com = "condor_q | grep -i total | cut -c 1"
 	status = os.system(status_com)
-	if status != 0:	
-		# Begin Checking out files if there are no more jobs in the queue.
+
+	# checking the status and time elapsed variable. Time elapsed set for a 2 hour wait before alerting.
+	if status == 0 or elapsed >= 12:
+		# Begin Checking output files, adds jobs without an out file to the error list.
 		if os.path.isfile("/path/to/cpu1.out") == true:
 			continue
 		else:
@@ -77,12 +79,9 @@ while true:
 	                continue
 	        else:
 	                error.append('DAG')
-	# checking the time elapsed variable, this is set for a 2 hour wait for job completion before alerting.
-	if elapsed < 12:
-		continue
-	else:
-		# send email template.
-		# Jobs are still in the queue after 2 hours and should have completed.
+		if error == "":
+			os.system("echo 'Submission/Completion of jobs: SUCCESS' >> submitter.log")
+
 
 	# Increment the time elapsed variable and sleep for 10 minutes before checking again.
 	elapsed = elapsed + 1
