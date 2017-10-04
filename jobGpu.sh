@@ -1,6 +1,6 @@
 #!/bin/bash
 
-./a.out
+./gpuscript
 date
 nvidia-smi
 
