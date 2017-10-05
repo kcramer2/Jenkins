@@ -27,7 +27,11 @@ for test in tests:
 		failed = "echo 'job(s) failed to submit:' " + test + " >> submitter.log"
 		os.system(failed)
 		# Send  email to notify of job submission failure
-
+		failed-submit = 1
+if failed-submit == 1:
+	# Email only once for any non-dag submissions errors. A seperate email template should be utlized
+	email_comm = "pysendm.py" 
+	
 try:
 	os.system(command_dag)
 except:
@@ -81,7 +85,10 @@ while true:
 	                error.append('DAG')
 		if error == "":
 			os.system("echo 'Submission/Completion of jobs: SUCCESS' >> submitter.log")
-
+		else:
+			os.system("echo 'Completion of jobs: FAILED. Alerting via Email' >> submitter.log")
+			email_comm = "pysendm.py " + error
+			os.system(email_comm)
 
 	# Increment the time elapsed variable and sleep for 10 minutes before checking again.
 	elapsed = elapsed + 1

@@ -9,15 +9,17 @@ userNames = [u for u in userList]
 # Users email list
 emailList = [name +  "@wisc.edu" for name in userNames]
 
+error = sys.argv[1]
+
 # Submit server running the script
 proc = subprocess.Popen("hostname", shell=True, stdout=subprocess.PIPE, )
 submitserver = proc.communicate()[0]
 
 SERVER = "chtc.wisc.edu"
-FROM = "aaaaaa@example.com"
+FROM = "submit-test@chtc.wisc.edu"
 TO = emailList
 SUBJECT = ("issue with" + " " + submitserver)
-MSG = "These test jobs are not being successully submitted"
+MSG = "Test jobs are not being successully submitted: " + error
 
 # Prepare actual message
 
