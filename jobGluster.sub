@@ -1,5 +1,5 @@
 executable = jobGluster.sh
-transfer_input_files = ffmpeg
+transfer_input_files = ffmpeg,/mnt/gluster/chtc/submitTesting/test_open_terminal.mov
 output = jobGluster.out
 error = jobGluster.error
 log = jobGluster.log

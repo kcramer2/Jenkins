@@ -1,4 +1,4 @@
-executable              = jobdag.sh
+executable              = gatherinfo.sh
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
 log                     = jdag.log

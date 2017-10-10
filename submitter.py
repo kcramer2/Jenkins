@@ -10,36 +10,53 @@
 # If output is bad,  and queue is empty  an alert email will be sent
 #
 
+# import OS for shell commands, and time for sleep function
 import os, time
 
-# submit the test files when run
-
+# creates the base submission commands for regular and dag submissions
 command = "condor_submit"
 command_dag = "condor_submit_dag jobdag.dag"
+
+# Create the list for each of the regular jobs to submit
 tests = ('job1cpu.sub', 'jobDocker.sub', 'jobGluster.sub', 'jobMem.sub', 'mpi_run.sub', 'jobGpu.sub' )
 
+# initializes the failure variable for exceptions.
+failed_submit = 0
+
+# Loops through each job in the test list, creates a new command for the specific test.
 for test in tests:
 	run = command + " " + test
+
+	# Attempts to run the new command variable
 	try:
 		os.system(run)
+
+	# 'handles' the exceptions if the command fails
 	except:
 		# Log output if job submission failed
 		failed = "echo 'job(s) failed to submit:' " + test + " >> submitter.log"
 		os.system(failed)
-		# Send  email to notify of job submission failure
-		failed-submit = 1
-if failed-submit == 1:
+
+		# Increments the failed_submit variable to prevent spam email from being sent from multiple exceptions.
+		failed_submit = 1
+
+# checks to see if an exception was encountered
+if failed_submit == 1:
 	# Email only once for any non-dag submissions errors. A seperate email template should be utlized
 	email_comm = "pysendm.py" 
 
+# Attempts to pass the command for the DAG job to the command line
 try:
 	os.system(command_dag)
+# 'Handles' errors that occur with the dag submission command
 except:
         failed = "echo 'job failed to submit: jobDAG' >> submitter.log"
         os.system(failed)
 
-
+# Sets a variable to track how many loops have occured to track time in queue
 elapsed = 0
+
+# Main loop.
 while True:
 	# The following outfiles are checked for their existence:
 	# cpu1.out, gluster.mov, mpi.out, jobGpu.out, docker.out, mem.out, jdag.out
@@ -56,7 +73,7 @@ while True:
 	status = int(status)
 
 	# checking the status and time elapsed variable. Time elapsed set for a 2 hour wait before alerting.
-	if status == 0 or elapsed >= 10:
+	if status == 0 or elapsed >= 12:
 		# Begin Checking output files, adds jobs without an out file to the error list.
 		print('if statement 1')
 		print(error)
@@ -75,11 +92,21 @@ while True:
 	        if os.path.isfile("/home/kcramer/jdag.out") != True:
 	                error.append('DAG')
 		print('this should hold strings', error)
+
+		# checks for an empty list, indicating all output files are present
 		if error == []:
+
+			# logs the successful completion of the test
 			os.system("echo 'Submission/Completion of jobs: SUCCESS' >> submitter.log")
+
+			# exits the loop
 			break
 		else:
+
+			# Outfile(s) not present, writting to log
 			os.system("echo 'Completion of jobs: FAILED. Alerting via Email' >> submitter.log")
+
+			# Sends an email to inform of a failure during the submission checks
 			#email_comm = "pysendm.py " + error
 			#os.system(email_comm)
 			break
