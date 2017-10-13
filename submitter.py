@@ -11,7 +11,7 @@
 #
 
 # import OS for shell commands, and time for sleep function
-import os, time
+import os, time, smtplib, subprocess
 
 # creates the base submission commands for regular and dag submissions
 command = "condor_submit"
@@ -22,6 +22,46 @@ tests = ('job1cpu.sub', 'jobDocker.sub', 'jobGluster.sub', 'jobMem.sub', 'mpi_ru
 
 # initializes the failure variable for exceptions.
 failed_submit = 0
+
+# create email function to call when sending alerts
+def send_email(error,text):
+	# List of users to notify
+	userList = ["turatsinze","kcramer3"]
+
+	userNames = [u for u in userList]
+
+	# Users email list
+	emailList = [name +  "@wisc.edu" for name in userNames]
+
+
+	# Submit server running the script
+	proc = subprocess.Popen("hostname", shell=True, stdout=subprocess.PIPE, )
+	submitserver = proc.communicate()[0]
+
+	SERVER = "chtc.wisc.edu"
+	FROM = "submit-test@chtc.wisc.edu"
+	TO = emailList
+	SUBJECT = ("issue with" + " " + submitserver)
+	MSG = text + "\n" + error
+
+	# Prepare actual message
+
+	message = """\
+	From: %s
+	To: %s
+	Subject: %s
+
+	%s
+	""" % (FROM, ", ".join(TO), SUBJECT, MSG)
+
+	# Send the mail
+
+	server = smtplib.SMTP(SERVER)
+	server.sendmail(FROM, TO, message)
+	server.quit()
+
+
+
 
 # Loops through each job in the test list, creates a new command for the specific test.
 for test in tests:
@@ -43,15 +83,24 @@ for test in tests:
 # checks to see if an exception was encountered
 if failed_submit == 1:
 	# Email only once for any non-dag submissions errors. A seperate email template should be utlized
-	email_comm = "pysendm.py" 
+	text = " One or more the non-dag jobs failed to submit. Please investigate"
+	send_mail(error,text)
+	failed_submit = 0
 
 # Attempts to pass the command for the DAG job to the command line
 try:
 	os.system(command_dag)
 # 'Handles' errors that occur with the dag submission command
 except:
-        failed = "echo 'job failed to submit: jobDAG' >> submitter.log"
+        failed_submit = 1
+	failed = "echo 'job failed to submit: jobDAG' >> submitter.log"
         os.system(failed)
+
+if failed_submit == 1:
+	text = " The DAG job submission has failed to submit. Please investigate"
+	send_mail(error,text)
+	failed_submit = 0
+
 
 # Sets a variable to track how many loops have occured to track time in queue
 elapsed = 0
@@ -79,7 +128,7 @@ while True:
 		print(error)
 		if os.path.isfile("/path/to/cpu1.out") != True:
 			error.append('cpu')
-	        if os.path.isfile("/home/kcramer/gluster.mov") != True and os.path.isfile("/path/to/gluser.out") != True:
+	        if os.path.isfile("/home/kcramer/gluster.mp4") != True and os.path.isfile("/home/kcramer/gluster.out") != True:
 	                error.append('gluster')
 	        if os.path.isfile("/home/kcramer/mpi.out") != True:
 	                error.append('mpi')
@@ -107,8 +156,8 @@ while True:
 			os.system("echo 'Completion of jobs: FAILED. Alerting via Email' >> submitter.log")
 
 			# Sends an email to inform of a failure during the submission checks
-			#email_comm = "pysendm.py " + error
-			#os.system(email_comm)
+			text = " The following tests have not completed running within 2 hours and may be stuck in the queue" + "\n"
+			send_email(error,test)
 			break
 	else:
 		print('failed check')
