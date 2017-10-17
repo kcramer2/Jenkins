@@ -1,8 +1,8 @@
 executable = jobGluster.sh
 transfer_input_files = ffmpeg,/mnt/gluster/chtc/submitTesting/test_open_terminal.mov
-output = jobGluster.out
-error = jobGluster.error
-log = jobGluster.log
+output = gluster.out
+error = gluster.err
+log = gluster.log
 request_memory = 5GB 
 request_disk = 5GB
 request_cpus = 1
