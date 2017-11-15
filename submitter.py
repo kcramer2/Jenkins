@@ -1,4 +1,4 @@
-#
+#!/usr/bin/python
 #		Python Submitter File
 #		Kent Cramer II
 #		In collaboration with Emile Tura ( pysendm[basis for mail function], mpi1.sub )
@@ -66,7 +66,26 @@ def send_email(error,text):
 	server.sendmail(FROM, TO, message)
 	server.quit()
 
+def check_output(x):
+        # This list will track which jobs do not have an out file yet.
+        error = list()
 
+	#Check for the existence of each output file, append error list for non-existing output files.
+        if os.path.isfile("/home/kcramer/cpu1.out") != True:
+               error.append('cpu')
+        if os.path.isfile("/home/kcramer/gluster.mp4") != True and os.path.isfile("/home/kcramer/gluster.out") != True:
+               error.append('gluster')
+        if os.path.isfile("/home/kcramer/mpi.out") != True:
+               error.append('mpi')
+        if os.path.isfile("/home/kcramer/jobGpu.out") != True:
+               error.append('cpu')
+        if os.path.isfile("/home/kcramer/docker.out") != True:
+               error.append('docker')
+        if os.path.isfile("/home/kcramer/jdag.out") != True:
+               error.append('DAG')
+        if os.path.isfile("/home/kcramer/mem.out") != True and x != 'non-memory':
+               error.append('memory')
+	return error
 
 
 # Loops through each job in the test list, creates a new command for the specific test.
@@ -79,16 +98,16 @@ for test in tests:
 		failed = "echo 'job(s) failed to submit:' " + test + " >> submitter.log"
 		os.system(failed)
 
-		# Increments the failed_submit variable to prevent spam email from being sent from multiple exceptions.
+		# Increments the failed_submit variable to prevent spam email from being sent from multiple failed submissions.
 		failed_submit = 1
 
-# checks to see if an exception was encountered
+# checks to see if a submission failed.
 if failed_submit == 1:
-	# Email only once for any non-dag submissions errors. A seperate email template should be utlized
+	# Email only once for any non-dag submissions errors.
 	text = " One or more the non-dag jobs failed to submit. Please investigate"
 	# opens the log file to pull failure messages
 	log = open('submitter.log', 'r')
-	# adds the text from submitter.log to the error vaariable to pass to send_email function
+	# adds the text from submitter.log to the error variable to pass to send_email function
 	error = log.read()
 	send_email(error,text)
 	log.close()
@@ -112,69 +131,79 @@ if failed_submit == 1:
 	failed_submit = 0
 
 
-# Sets a variable to track how many loops have occured to track time in queue
+# Sets a variable to track how many loops have occured, tracking time in queue
 elapsed = 0
 
 # Main loop.
 while True:
-	# The following outfiles are checked for their existence:
-	# cpu1.out, gluster.mov, mpi.out, jobGpu.out, docker.out, mem.out, jdag.out
-	# The presence of these files should indicate successful completeion of the submission jobs
-	# This loop will check every 10 minutes for the status of these jobs, if 2 hours pass an alert will be generated
-
-	# This list will track which jobs do not have an out file yet.
-	error = list()
-
-	# This set of commands checks for the Jobs in queue. If jobs have not yet been processed, this will not be 0.
+	# This set of commands checks for the Jobs in queue. If jobs have completed, this will be 0.
 	# Rewritten with collaboration from Emile Tura.
 	print('checking command - iter:' + str(elapsed))
 	status = os.popen("condor_q | grep -i jobs | cut -c 1").read()
 	status = status.rstrip()
 	status = int(status)
 
-	# checking the status and time elapsed variable. Time elapsed set for a 2 hour wait before alerting.
-	if status == 0 or elapsed >= 12:
-		# Begin Checking output files, adds jobs without an out file to the error list.
-		print('if statement 1')
-		print(error)
-		if os.path.isfile("/home/kcramer/cpu1.out") != True:
-			error.append('cpu')
-	        if os.path.isfile("/home/kcramer/gluster.mp4") != True and os.path.isfile("/home/kcramer/gluster.out") != True:
-	                error.append('gluster')
-	        if os.path.isfile("/home/kcramer/mpi.out") != True:
-	                error.append('mpi')
-	        if os.path.isfile("/home/kcramer/jobGpu.out") != True:
-	                error.append('cpu')
-	        if os.path.isfile("/home/kcramer/docker.out") != True:
-	                error.append('docker')
-	        if os.path.isfile("/home/kcramer/mem.out") != True:
-	                error.append('memory')
-	        if os.path.isfile("/home/kcramer/jdag.out") != True:
-	                error.append('DAG')
-		print('this should hold strings', error)
-
-		# checks for an empty list, indicating all output files are present
-		if error == []:
-
-			# logs the successful completion of the test
-			os.system("echo 'Submission/Completion of jobs: SUCCESS' >> submitter.log")
-
-			# exits the loop
-			break
+	if status == 0:
+		# no jobs are left in the queue, check for output, log the event, email if there are erros and  break loop
+		errors = check_output('memory')
+		if errors == []:
+                        # logs the successful completion of the test
+                        os.system("echo 'Submission/Completion of memory job: SUCCESS' >> submitter.log")
+                        # break loop, all files are accounted for so jobs completed succesfully
+                        break
 		else:
+                        # Outfile(s) not present, writting to log
+                        os.system("echo 'Queued jobs 0. Completion of submitted jobs: FAILED(no output). Alerting via Email' >> submitter.log")
+                        failed = ""
+                        for i in errors:
+                                failed = " -" + failed + i + "  "  
+                        # Sends an email to inform of a failure during the submission checks
+                        text = " These jobs left the queue but did not complete: " + "\n"
+                        send_email(failed,text)
 
+        elif elapsed >= 336:
+		errors = check_output('memory')
+		failed = 0
+		for i in errors:
+			if i == 'memory':
+				failed = 1
+
+                if failed == 0:
+                        # logs the successful completion of the test
+                        os.system("echo 'Completion of memory job: SUCCESS' >> submitter.log")
+			# break while loop as this check is the maximum timeout for the Memory job / script
+			break
+                else:
+
+                        # Outfile(s) not present, writting to log
+                        os.system("echo 'Completion of Memory job: FAILED(no output). Alerting via Email' >> submitter.log")
+                        failed = ""
+                        for i in errors:
+                                failed = " -" +  failed + i + "  "  
+                        # Sends an email to inform of a failure during the submission checks
+                        text = " The memory job did not complete, failed jobs: " + "\n"
+                        send_email(failed,text)
+			# break while loop, 7 days have passed and memory job has not completed
+			break
+	# checking the status and time elapsed variable. Time elapsed set for a 2 hour wait before alerting.
+	elif elapsed == 4:
+		errors = check_output('non-memory')
+		if errors == []:
+			# logs the successful completion of the test
+			os.system("echo 'Submission/Completion of non-memory jobs: SUCCESS' >> submitter.log")
+
+		else:
 			# Outfile(s) not present, writting to log
-			os.system("echo 'Completion of jobs: FAILED. Alerting via Email' >> submitter.log")
-			errors = ""
-			for i in error:
-				errors = errors + i + " "  
+			os.system("echo 'Completion of non-memory jobs: FAILED(missing output). Alerting via Email' >> submitter.log")
+			failed = ""
+			for i in errors:
+				failed = " -" + failed + i + " "  
 			# Sends an email to inform of a failure during the submission checks
 			text = " The following tests have not completed running within 2 hours and may be stuck in the queue: " + "\n"
-			send_email(errors,text)
-			break
+                        send_email(failed,text)
 	else:
 		print('failed check')
 	# Increment the time elapsed variable and sleep for 10 minutes before checking again.
 	print(elapsed)
 	elapsed = elapsed + 1
-	time.sleep(600)
+	time.sleep(60)
