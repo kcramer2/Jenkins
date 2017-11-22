@@ -69,21 +69,23 @@ def send_email(error,text):
 def check_output(x):
         # This list will track which jobs do not have an out file yet.
         error = list()
+        
+        dir = os.popen("pwd").read()
 
 	#Check for the existence of each output file, append error list for non-existing output files.
-        if os.path.isfile("/home/kcramer/cpu1.out") != True:
+        if os.path.isfile(dir + "/cpu1.out") != True:
                error.append('cpu')
-        if os.path.isfile("/home/kcramer/gluster.mp4") != True and os.path.isfile("/home/kcramer/gluster.out") != True:
+        if os.path.isfile(dir + "/gluster.mp4") != True and os.path.isfile(dir + "/gluster.out") != True:
                error.append('gluster')
-        if os.path.isfile("/home/kcramer/mpi.out") != True:
+        if os.path.isfile(dir + "/mpi.out") != True:
                error.append('mpi')
-        if os.path.isfile("/home/kcramer/jobGpu.out") != True:
+        if os.path.isfile(dir + "/jobGpu.out") != True:
                error.append('cpu')
-        if os.path.isfile("/home/kcramer/docker.out") != True:
+        if os.path.isfile(dir + "/docker.out") != True:
                error.append('docker')
-        if os.path.isfile("/home/kcramer/jdag.out") != True:
+        if os.path.isfile(dir + "/jdag.out") != True:
                error.append('DAG')
-        if os.path.isfile("/home/kcramer/mem.out") != True and x != 'non-memory':
+        if os.path.isfile(dir + "/mem.out") != True and x != 'non-memory':
                error.append('memory')
 	return error
 
@@ -206,4 +208,4 @@ while True:
 	# Increment the time elapsed variable and sleep for 10 minutes before checking again.
 	print(elapsed)
 	elapsed = elapsed + 1
-	time.sleep(60)
+	time.sleep(30)
